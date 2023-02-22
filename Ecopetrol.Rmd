@@ -1,0 +1,74 @@
+---
+title: "Risk management"
+author: "Santa_Jstiwer"
+date: "2023-02-14"
+output: html_document
+---
+#setup the markdown
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+#Run the libraries
+```{r}
+library(tidyverse)
+library(quantmod)
+library(highcharter)
+library(forecast)
+library(PerformanceAnalytics)
+library(plotly)
+library(tseries)
+```
+#Get the data
+```{r}
+getSymbols("EC", from = "2018-01-01", to = "2023-01-01")
+head(EC)
+```
+#chart the data last six months
+```{r}
+chartSeries(EC, subset = "last 6 months", 
+            type = "auto",
+            )
+addBBands()
+addMACD()
+addRSI()
+```
+#get the returns
+```{r}
+returns = dailyReturn(EC$EC.Close)
+head(returns)
+```
+#differences betwenn clolse and open price
+```{r}
+Differences = EC$EC.Close - EC$EC.Open
+head(Differences)
+```
+#Do VaR method
+```{r}
+VaR(returns, p=0.95, method = "historical")
+VaR(Differences, p=0.95, method = "historical")
+
+```
+#charting returns and differences
+```{r}
+chartSeries(returns)
+chartSeries(Differences)
+```
+#Get a GARCH model to forecast prices
+```{r}
+Acf(returns, main = "Acf for differenced series")
+Pacf(returns, main = "pacf for differenced series")
+```
+#There is no white noise. So, there is heterocedasticity.
+
+
+#acf and pacf in autocorrelation series
+```{r}
+Acf(returns, plot = F)
+Pacf(returns, plot = F)
+```
+#adf test
+#P value is smaller than printed. elaborate...
+```{r}
+adf.test(returns, alternative = "stationary")
+```
+
